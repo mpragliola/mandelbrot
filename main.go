@@ -11,27 +11,27 @@ import (
 	"github.com/mpragliola/stopwatch"
 )
 
-const maxIterations = 40
-const width = 1200
-const height = 800
-const offset = 2 + 0.5i
-const zoom = 1.5
-const aliasFactor = 3.0
+const maxIterations = 40 // max no. of iterations of z = z²+c
+const width = 1200       // screen width
+const height = 800       // screen height
+const offset = 2 + 1i    // offset in the real plane
+const zoom = 0.5         // zoom factor
+const aliasFactor = 3.0  // aliasing, size N of the N x N subpixel square
 
 func main() {
+	// Uses my stopwatch tool to benchmark
 	s := stopwatch.NewStart()
 
-	upLeft := image.Point{0, 0}
-	lowRight := image.Point{width, height}
-	img := image.NewRGBA(image.Rectangle{upLeft, lowRight})
+	img := image.NewRGBA(image.Rectangle{image.Point{0, 0}, image.Point{width, height}})
 
 	wg := sync.WaitGroup{}
 	for ry := 0; ry < height; ry++ {
 		wg.Add(1)
+
 		go func(ry int) {
 			defer wg.Done()
 
-			var y, h, h2 float64
+			var x, y, h, h2 float64
 			for rx := 0; rx < width; rx++ {
 				h = 0
 				h2 = 0
@@ -42,7 +42,7 @@ func main() {
 					y = float64(ry) + subPixelY/aliasFactor
 
 					for subPixelX := 0.0; subPixelX < aliasFactor; subPixelX++ {
-						x := float64(rx) + subPixelX/aliasFactor
+						x = float64(rx) + subPixelX/aliasFactor
 
 						// scale by zoom and translate by offset from screen coordinates to complex plane
 						fac := complex(float64(height), 0.0) * zoom
